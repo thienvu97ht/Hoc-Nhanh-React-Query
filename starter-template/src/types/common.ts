@@ -17,11 +17,7 @@ interface ObjectsResponse<T> {
 }
 
 export interface ListResponse<T> {
-  code: number
-  results: {
-    objects: ObjectsResponse<T>
-  }
-  pagination: PaginationParams
+  data: Array<T>
 }
 
 export interface ItemResponse<T> {

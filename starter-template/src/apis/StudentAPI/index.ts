@@ -1,13 +1,13 @@
-import { ListParams, ListResponse, Student } from '~/types'
+import { ListParams, ListResponse, Student } from 'types'
 import axiosClient from '../axiosClient'
 
-const ROUTE = 'student'
+const ROUTE = 'students'
 
-const userAPI = {
+const studentAPI = {
   async getList(params: ListParams): Promise<ListResponse<Student>> {
     const url = `${ROUTE}`
     return await axiosClient.get(url, { params })
   }
 }
 
-export default userAPI
+export default studentAPI

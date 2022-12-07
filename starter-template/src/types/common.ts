@@ -1,35 +1,16 @@
-export interface PaginationParams {
-  current_page: number
-  next_page: number
-  prev_page: number
-  limit: number
-}
-
 export interface Pagination {
-  page: number
-  limit: number
-  total: number
-}
-
-interface ObjectsResponse<T> {
-  count: number
-  rows: Array<T>
-}
-
-export interface ListResponse<T> {
-  data: Array<T>
-}
-
-export interface ItemResponse<T> {
-  code: number
-  results: {
-    object: T
-  }
+    page: number;
+    limit: number;
+    total: number;
 }
 
 export interface ListParams {
-  _page?: number
-  _limit?: number
+    _page?: number;
+    _limit?: number;
 
-  [key: string]: any
+    [key: string]: any;
+}
+
+export interface BodyUpdate {
+    [key: string]: any;
 }

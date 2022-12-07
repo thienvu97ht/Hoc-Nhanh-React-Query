@@ -52,6 +52,9 @@ router.render = (req, res) => {
       avatar: student.avatar,
       last_name: student.last_name,
       email: student.email,
+      gender: student.gender,
+      country: student.country,
+      btc_address: student.btc_address,
     }));
   }
   res.jsonp(data);

@@ -1,42 +1,42 @@
-import axios, { AxiosResponse } from 'axios'
-import queryString from 'query-string'
+import axios, { AxiosResponse } from 'axios';
+import queryString from 'query-string';
 
-const VITE_APP_API = 'http://localhost:4000'
+const VITE_APP_API = 'http://localhost:4000';
 
 const axiosClient = axios.create({
-  baseURL: VITE_APP_API,
+    baseURL: VITE_APP_API,
 
-  headers: {
-    'Content-Type': 'application/json'
-  },
+    headers: {
+        'Content-Type': 'application/json',
+    },
 
-  paramsSerializer: (params: any) => {
-    for (let key in params) {
-      params[key] = JSON.stringify(params[key])
-    }
-    return queryString.stringify(params)
-  }
-})
+    paramsSerializer: (params: any) => {
+        for (let key in params) {
+            params[key] = JSON.stringify(params[key]);
+        }
+        return queryString.stringify(params);
+    },
+});
 
-axios.defaults.baseURL = VITE_APP_API
+axios.defaults.baseURL = VITE_APP_API;
 axiosClient.interceptors.request.use(async (config: any) => {
-  const userInfo = JSON.parse(localStorage?.getItem('userInfo') || '{}')
+    const userInfo = JSON.parse(localStorage?.getItem('userInfo') || '{}');
 
-  if (!!userInfo.object) {
-    config.headers.Authorization = `Bearer ${userInfo.object.token}`
-  }
+    if (!!userInfo.object) {
+        config.headers.Authorization = `Bearer ${userInfo.object.token}`;
+    }
 
-  return config
-})
+    return config;
+});
 
 axiosClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response
-  },
-  (error) => {
-    // Handle errors
-    throw error.response?.data
-  }
-)
+    (response: AxiosResponse) => {
+        return response;
+    },
+    (error: AxiosResponse) => {
+        // Handle errors
+        throw error;
+    },
+);
 
-export default axiosClient
+export default axiosClient;

@@ -5,9 +5,9 @@ import axiosClient from '../axiosClient';
 const ROUTE = 'students';
 
 const studentAPI = {
-    async getList(params: ListParams): Promise<AxiosResponse> {
+    async getList(params: ListParams, signal?: AbortSignal): Promise<AxiosResponse> {
         const url = `${ROUTE}`;
-        return await axiosClient.get(url, { params });
+        return await axiosClient.get(url, { params, signal });
     },
 
     async getItem(id: number | string): Promise<AxiosResponse> {

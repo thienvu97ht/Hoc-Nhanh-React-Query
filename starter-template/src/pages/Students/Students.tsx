@@ -15,12 +15,22 @@ export default function Students() {
 
     const studentsQuery = useQuery({
         queryKey: ['students', page],
-        queryFn: () =>
-            studentAPI.getList({
-                _page: page,
-                _limit: LIMIT,
-            }),
+        queryFn: () => {
+            const controller = new AbortController();
+
+            setTimeout(() => {
+                controller.abort();
+            }, 5000);
+            return studentAPI.getList(
+                {
+                    _page: page,
+                    _limit: LIMIT,
+                },
+                controller.signal,
+            );
+        },
         keepPreviousData: true,
+        retry: 0,
     });
 
     const deleteStudentMutation = useMutation({
@@ -42,14 +52,56 @@ export default function Students() {
     };
 
     const handlePrefetchStudent = (id: number) => {
+        // queryClient.prefetchQuery(['student', String(id)], {
+        //     queryFn: () => studentAPI.getItem(id),
+        //     staleTime: 10 * 1000,
+        // });
+    };
+
+    const fetchStudent = (second: number) => {
+        const id = '6';
         queryClient.prefetchQuery(['student', String(id)], {
             queryFn: () => studentAPI.getItem(id),
+            staleTime: second * 1000,
+        });
+    };
+
+    const refetchStudents = () => {
+        studentsQuery.refetch();
+    };
+
+    const cancelRequestStudents = () => {
+        queryClient.cancelQueries({
+            queryKey: ['students', page],
         });
     };
 
     return (
         <div>
             <h1 className="text-lg">Students</h1>
+            <div>
+                <button className="mt-6 rounded bg-blue-500 px-5 py-2 text-white" onClick={() => fetchStudent(10)}>
+                    Click 10s
+                </button>
+            </div>
+            <div>
+                <button className="mt-6 rounded bg-blue-500 px-5 py-2 text-white" onClick={() => fetchStudent(2)}>
+                    Click 2s
+                </button>
+            </div>
+
+            <div>
+                <button className="mt-6 rounded bg-pink-500 px-5 py-2 text-white" onClick={refetchStudents}>
+                    Refetch Student
+                </button>
+            </div>
+
+            <div>
+                <button className="mt-6 rounded bg-pink-500 px-5 py-2 text-white" onClick={cancelRequestStudents}>
+                    Cancel Refetch Student
+                </button>
+            </div>
+
             <div className="mt-6">
                 <Link
                     to="/students/add"

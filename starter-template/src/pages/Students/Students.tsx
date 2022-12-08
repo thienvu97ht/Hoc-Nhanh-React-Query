@@ -1,17 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import studentAPI from 'apis/StudentAPI';
 import { Link } from 'react-router-dom';
 import { Student } from 'types';
 import { useQueryString } from 'utils/utils';
 import classNames from 'classnames';
 import { Fragment } from 'react';
+import { toast } from 'react-toastify';
 
 const LIMIT = 10;
 export default function Students() {
+    const queryClient = useQueryClient();
     const queryString = useQueryString();
     const page = Number(queryString.page) || 1;
 
-    const { data, isLoading } = useQuery({
+    const studentsQuery = useQuery({
         queryKey: ['students', page],
         queryFn: () =>
             studentAPI.getList({
@@ -21,8 +23,29 @@ export default function Students() {
         keepPreviousData: true,
     });
 
-    const totalStudentsCount = Number(data?.headers['x-total-count'] || 0);
+    const deleteStudentMutation = useMutation({
+        mutationFn: (id: number | string) => studentAPI.delete(id),
+        onSuccess: (_, id) => {
+            toast.success(`Xóa thành công student với id là ${id}`);
+            queryClient.invalidateQueries({
+                queryKey: ['students', page],
+                exact: true,
+            });
+        },
+    });
+
+    const totalStudentsCount = Number(studentsQuery?.data?.headers['x-total-count'] || 0);
     const totalPage = Math.ceil(totalStudentsCount / LIMIT);
+
+    const handleDelete = (id: number) => {
+        deleteStudentMutation.mutate(id);
+    };
+
+    const handlePrefetchStudent = (id: number) => {
+        queryClient.prefetchQuery(['student', String(id)], {
+            queryFn: () => studentAPI.getItem(id),
+        });
+    };
 
     return (
         <div>
@@ -36,9 +59,9 @@ export default function Students() {
                 </Link>
             </div>
 
-            {isLoading ? (
+            {studentsQuery?.isLoading ? (
                 <div role="status" className="mt-6 animate-pulse">
-                    <div className="mb-4 h-4  rounded bg-gray-200 dark:bg-gray-700" />
+                    <div className="mb-4 h-4 rounded bg-gray-200 dark:bg-gray-700" />
                     <div className="mb-2.5 h-10 rounded bg-gray-200 dark:bg-gray-700" />
                     <div className="mb-2.5 h-10 rounded bg-gray-200 dark:bg-gray-700" />
                     <div className="mb-2.5 h-10 rounded bg-gray-200 dark:bg-gray-700" />
@@ -77,30 +100,34 @@ export default function Students() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data?.data?.map((item: Student) => (
+                                {studentsQuery?.data?.data?.map((student: Student) => (
                                     <tr
-                                        key={item?.id}
+                                        key={student?.id}
                                         className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
+                                        onMouseEnter={() => handlePrefetchStudent(student?.id)}
                                     >
-                                        <td className="py-4 px-6">{item?.id}</td>
+                                        <td className="py-4 px-6">{student?.id}</td>
                                         <td className="py-4 px-6">
-                                            <img src={item?.avatar} alt="student" className="h-5 w-5" />
+                                            <img src={student?.avatar} alt="student" className="h-5 w-5" />
                                         </td>
                                         <th
                                             scope="row"
                                             className="whitespace-nowrap py-4 px-6 font-medium text-gray-900 dark:text-white"
                                         >
-                                            {item?.last_name}
+                                            {student?.last_name}
                                         </th>
-                                        <td className="py-4 px-6">{item?.email}</td>
+                                        <td className="py-4 px-6">{student?.email}</td>
                                         <td className="py-4 px-6 text-right">
                                             <Link
-                                                to="/students/1"
+                                                to={`/students/${student?.id}`}
                                                 className="mr-5 font-medium text-blue-600 hover:underline dark:text-blue-500"
                                             >
                                                 Edit
                                             </Link>
-                                            <button className="font-medium text-red-600 dark:text-red-500">
+                                            <button
+                                                onClick={() => handleDelete(student?.id)}
+                                                className="font-medium text-red-600 dark:text-red-500"
+                                            >
                                                 Delete
                                             </button>
                                         </td>
